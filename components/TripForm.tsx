@@ -1,25 +1,44 @@
 "use client";
-import { useState } from "react";
-
-type Trip = {
-  id: number;
-  place: string;
-  city: string;
-  date: string;
-};
+import { useEffect, useState } from "react";
+import { Trip } from "@/types/trip";
+import { User } from "@/types/user";
+import { useRouter } from "next/navigation";
 
 export default function TripForm() {
-  const [place, setPlace] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [date, setDate] = useState<string>("");
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const user = JSON.parse(
+      localStorage.getItem("currentUser") || "null"
+    );
+
+    if (!user) {
+      alert("Login required");
+      router.push("/login");
+    } else {
+      setCurrentUser(user);
+    }
+  }, [router]);
+
+  if (!currentUser) {
+    return null;
+  }
 
   const handleSubmit = (e: any): void => {
     e.preventDefault();
-    const newTrip : Trip = {
+    const newTrip: Trip = {
       id: Date.now(),
-      place,
+      title,
+      location,
       city,
       date,
+      userId: currentUser.id,
     };
 
     const existingTrips: Trip[] =
@@ -30,7 +49,8 @@ export default function TripForm() {
       JSON.stringify([...existingTrips, newTrip])
     );
 
-    setPlace("");
+    setTitle("");
+    setLocation("");
     setCity("");
     setDate("");
     alert("Trip Added!");
@@ -38,11 +58,18 @@ export default function TripForm() {
 
   return (
     <form className="max-w-md mx-auto space-y-4" onSubmit={handleSubmit}>
-        <input
+      <input
         className="border p-2 w-full text-black"
-        placeholder="Place"
-        value={place}
-        onChange={(e) => setPlace(e.target.value)}
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <input
+        className="border p-2 w-full text-black"
+        placeholder="Location"
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
         required
       />
       <input
@@ -65,7 +92,7 @@ export default function TripForm() {
         type="submit"
       >
         Add Trip
-      </button>      
+      </button>
     </form>
   );
 }

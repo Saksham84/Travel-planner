@@ -2,17 +2,14 @@
 import { useEffect, useState } from "react";
 import TripCard from "@/components/TripCard";
 import EditTripForm from "@/components/EditTripForm";
-
-type Trip = {
-    id: number;
-    place: string;
-    city: string;
-    date: string;
-};
+import Link from "next/link";
+import { Trip } from "@/types/trip";
+import { User } from "@/types/user";
 
 export default function Trips() {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
     const handleDelete = (id: number): void => {
         const isConfirmed = window.confirm(
@@ -39,14 +36,22 @@ export default function Trips() {
         const storedTrips =
             JSON.parse(localStorage.getItem("trips") || "[]");
         setTrips(storedTrips);
+
+        const user = JSON.parse(
+            localStorage.getItem("currentUser") || "null"
+        );
+        setCurrentUser(user);
     }, []);
 
     return (
         <main className="p-6 bg-white dark:bg-gray-900 text-black dark:text-white">
-            <h2 className="text-xl font-bold mb-4">My Trips</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold mb-4">My Trips</h2>
+                <Link href="/add-trip" className="hover:underline px-3 py-1 border rounded">Add Trip</Link>
+            </div>
             <div className="grid md:grid-cols-3 gap-4">
                 {trips.map((trip: Trip) => (
-                    <TripCard key={trip.id} trip={trip} onDelete={handleDelete} onEdit={setEditingTrip} />
+                    <TripCard key={trip.id} trip={trip} canEdit={currentUser?.id === trip.userId} onDelete={handleDelete} onEdit={setEditingTrip} />
                 ))}
             </div>
             <br />
@@ -69,14 +74,6 @@ export default function Trips() {
                     </div>
                 </div>
             )}
-
-            {/* {editingTrip && (
-            <EditTripForm
-                trip={editingTrip}
-                onSave={handleSaveEdit}
-                onCancel={() => setEditingTrip(null)}
-            />
-        )} */}
         </main>
     );
 }

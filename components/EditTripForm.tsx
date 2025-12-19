@@ -1,11 +1,5 @@
 import { useState } from "react";
-
-type Trip = {
-    id: number;
-    place: string;
-    city: string;
-    date: string;
-};
+import { Trip } from "@/types/trip";
 
 type Props = {
     trip: Trip;
@@ -14,14 +8,16 @@ type Props = {
 };
 
 export default function EditTripForm({ trip, onSave, onCancel }: Props) {
-    const [place, setPlace] = useState(trip.place);
+    const [title, setTitle] = useState(trip.title);
+    const [location, setLocation] = useState(trip.location);
     const [city, setCity] = useState(trip.city);
     const [date, setDate] = useState(trip.date);
 
     const handleSave = () => {
         onSave({
             ...trip,
-            place,
+            title,
+            location,
             city,
             date,
         });
@@ -30,8 +26,10 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
     return (
         <div className="border p-8 rounded space-y-2 flex flex-col max-w-md mx-auto">
             <h2 className="text-lg font-bold mb-4">Edit Trip</h2>
-            <label>Place:</label>
-            <input className="border p-2 w-full text-black" value={place} onChange={(e) => setPlace(e.target.value)} />
+            <label>Title:</label>
+            <input className="border p-2 w-full text-black" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label>Location:</label>
+            <input className="border p-2 w-full text-black" value={location} onChange={(e) => setLocation(e.target.value)} />
             <label>City:</label>
             <input className="border p-2 w-full text-black" value={city} onChange={(e) => setCity(e.target.value)} />
             <label>Date:</label>
