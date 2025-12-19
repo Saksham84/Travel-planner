@@ -1,9 +1,10 @@
 import React from 'react'
 import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react'
+import Link from 'next/link';
 
 export default function Footer() {
     return (
-        <footer className='bg-gray-50 dark:bg-gray-900 border-t border-gray-200 ddark:border-gray-800 py-12 lg:py-16'>
+        <footer className='bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-12 lg:py-16'>
             <div className='container mx-auto px-4 lg:px-8'>
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12'>
                     <div className='lg: col-span-2'>
@@ -16,58 +17,58 @@ export default function Footer() {
                             Start your journey with us today.
                         </p>
                         <div className="flex gap-3">
-                            <a
+                            <Link
                                 href="#"
                                 className="w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-blue-500 hover:to-teal-500 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-lg"
                                 aria-label="Facebook"
                             >
                                 <Facebook size={18} />
-                            </a>
-                            <a
+                            </Link>
+                            <Link
                                 href="#"
                                 className="w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-blue-500 hover:to-teal-500 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-lg"
                                 aria-label="Instagram"
                             >
                                 <Instagram size={18} />
-                            </a>
-                            <a
+                            </Link>
+                            <Link
                                 href="#"
                                 className="w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-blue-500 hover:to-teal-500 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-lg"
                                 aria-label="Twitter"
                             >
                                 <Twitter size={18} />
-                            </a>
-                            <a
+                            </Link>
+                            <Link
                                 href="#"
                                 className="w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-blue-500 hover:to-teal-500 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-lg"
                                 aria-label="LinkedIn"
                             >
                                 <Linkedin size={18} />
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <div>
                         <h3 className="text-gray-900 dark:text-gray-100 mb-4">Quick Links</h3>
                         <ul className="space-y-3">
                             <li>
-                                <a href="#home" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="/" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Home
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#features" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="#features" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Features
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#trips" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="/trips" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Trips
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#about" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="/about" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     About
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -76,24 +77,24 @@ export default function Footer() {
                         <h3 className="text-gray-900 dark:text-gray-100 mb-4">Resources</h3>
                         <ul className="space-y-3">
                             <li>
-                                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Help Center
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Privacy Policy
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Terms of Service
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     Contact Us
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -105,15 +106,15 @@ export default function Footer() {
                             © 2025 TripPlanner. All rights reserved.
                         </p>
                         <div className="flex gap-6 text-sm">
-                            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 Privacy
-                            </a>
-                            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            </Link>
+                            <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 Terms
-                            </a>
-                            <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            </Link>
+                            <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 Cookies
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

@@ -3,16 +3,37 @@ import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
 import { useEffect, useState } from "react";
 import { User } from "@/types/user";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const router = useRouter();
 
-  useEffect(() => {
+  const loadUser = () => {
     const user = JSON.parse(
       localStorage.getItem("currentUser") || "null"
     );
     setCurrentUser(user);
+  };
+
+  useEffect(() => {
+    loadUser();
+
+    window.addEventListener("auth-change", loadUser);
+    window.addEventListener("storage", loadUser);
+
+    return () => {
+      window.removeEventListener("auth-change", loadUser);
+      window.removeEventListener("storage", loadUser);
+    };
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    setCurrentUser(null);
+    window.dispatchEvent(new Event("auth-change"));
+    router.push("/");
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
@@ -43,7 +64,7 @@ export default function Navbar() {
               Trips
             </Link>
 
-            {!currentUser && (
+            {!currentUser ? (
               <div className="flex items-center gap-8">
                 <Link
                   href="/login"
@@ -59,13 +80,22 @@ export default function Navbar() {
                   Signup
                 </Link>
               </div>
+            ) : (
+              <div className="flex items-center gap-8">
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" 
+                  >
+                  Logout
+                </button>
+              </div>
             )}
           </nav>
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-            <DarkModeToggle />
           </div>
+            <DarkModeToggle />
         </div>
       </div>
     </header>

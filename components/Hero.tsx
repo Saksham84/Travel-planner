@@ -1,7 +1,12 @@
+"use client";
+
 import React from 'react'
 import { Plus, Compass } from 'lucide-react'
+import { useRouter } from 'next/navigation';
 
 export default function Hero() {
+    const router = useRouter();
+
     return (
         <section id='home' className="relative min-h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 z-0">
@@ -35,16 +40,15 @@ export default function Hero() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
-                        // size="lg"
-                        className="bg-white text-blue-600 hover:bg-gray-100 rounded-full px-8 py-6 text-lg shadow-2xl shadow-blue-900/50 gap-2"
+                        onClick={() => router.push('/add-trip')}
+                        className="bg-white text-blue-600 hover:bg-gray-100 rounded-full px-8 py-4 text-lg shadow-2xl shadow-blue-900/50 gap-2 flex items-center"
                     >
                         <Plus size={20} />
                         Add a Trip
                     </button>
                     <button
-                        // size="lg"
-                        // variant="outline"
-                        className="bg-transparent hover:bg-white/10 text-white border-2 border-white/30 rounded-full px-8 py-6 text-lg backdrop-blur-sm gap-2"
+                        onClick={() => router.push('/trips')}
+                        className="bg-transparent hover:bg-white/10 text-white border-2 border-white/30 rounded-full px-8 py-4 text-lg backdrop-blur-sm gap-2 flex items-center"
                     >
                         <Compass size={20} />
                         Explore Trips

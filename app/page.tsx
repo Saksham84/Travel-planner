@@ -1,4 +1,6 @@
 import Hero from '@/components/Hero';
+import { PopularTrips } from '@/components/PopularTrips';
+import { WhyChooseUs } from '@/components/WhyChooseUs';
 
 export default function Home() {
   return (
@@ -11,6 +13,8 @@ export default function Home() {
         Plan your trips, save destinations, and view them in one place.
       </p> */}
       <Hero />
+      <PopularTrips />
+      <WhyChooseUs />
     </main>
   );
 }
