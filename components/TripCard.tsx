@@ -26,7 +26,7 @@ export default function TripCard({
       {/* Image */}
       <div className="relative h-72 overflow-hidden">
         <img
-          src={trip.image || DEFAULT_IMAGE}
+          src={trip.image?.url || DEFAULT_IMAGE}
           alt={trip.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />

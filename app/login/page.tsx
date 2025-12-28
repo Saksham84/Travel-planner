@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 
 export default function Login() {
   const router = useRouter();
@@ -9,9 +10,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { showToast } = useToast();
+
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Email and password are required");
+    //   alert("Email and password are required");
+    showToast("Email and password are required", "warning")
       return;
     }
 
@@ -29,16 +33,19 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Login failed");
+        // alert(data.error || "Login failed");
+        showToast(data.error || "Login failed", "error")
         setLoading(false);
         return;
       }
 
       // 🔥 JWT is now stored in HttpOnly cookie
       window.dispatchEvent(new Event("auth-change"));
+      showToast("Login Successful", "success")
       router.push("/");
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+    //   alert("Something went wrong. Please try again.");
+    showToast("Something went wrong. Please try again.", "error")
     } finally {
       setLoading(false);
     }

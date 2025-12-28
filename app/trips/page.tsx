@@ -6,6 +6,7 @@ import EditTripForm from "@/components/EditTripForm";
 import Link from "next/link";
 import { Trip } from "@/types/trip";
 import { User } from "@/types/user";
+import { useToast } from "@/components/ToastProvider";
 
 export default function Trips() {
     const router = useRouter();
@@ -14,6 +15,8 @@ export default function Trips() {
     const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const { showToast } = useToast();
 
     // 🔹 Open single trip
     const openTrip = (id: string) => {
@@ -62,7 +65,8 @@ export default function Trips() {
         });
 
         if (!res.ok) {
-            alert("Not authorized or failed to delete");
+            // alert("Not authorized or failed to delete");
+            showToast("Not authorized or failed to delete", "warning")
             return;
         }
 
@@ -70,33 +74,55 @@ export default function Trips() {
     };
 
     // 🔹 Save edited trip
-    const handleSaveEdit = async (updatedTrip: Trip) => {
-        const res = await fetch(`/api/trips/${updatedTrip._id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedTrip),
-        });
+    const handleSaveEdit = async (
+        updatedTrip: Trip,
+        imageFile?: File | null
+    ) => {
+        try {
+            const formData = new FormData();
 
-        if (!res.ok) {
-            alert("Failed to update trip");
-            return;
+            // append text fields
+            formData.append("title", updatedTrip.title);
+            formData.append("location", updatedTrip.location);
+            formData.append("city", updatedTrip.city);
+            formData.append("date", updatedTrip.date);
+            formData.append("description", updatedTrip.description);
+
+            // append image only if user selected new one
+            if (imageFile) {
+                formData.append("image", imageFile);
+            }
+
+            const res = await fetch(`/api/trips/${updatedTrip._id}`, {
+                method: "PUT",
+                body: formData, // ❌ no headers
+            });
+
+            if (!res.ok) {
+                showToast("Failed to update trip", "error");
+                return;
+            }
+
+            const savedTrip = await res.json();
+
+            setTrips((prev) =>
+                prev.map((trip) =>
+                    trip._id === savedTrip._id ? savedTrip : trip
+                )
+            );
+
+            setEditingTrip(null);
+            showToast("Trip updated successfully", "success");
+        } catch (error) {
+            showToast("Something went wrong", "error");
         }
-
-        const savedTrip = await res.json();
-
-        setTrips((prev) =>
-            prev.map((trip) =>
-                trip._id === savedTrip._id ? savedTrip : trip
-            )
-        );
-
-        setEditingTrip(null);
     };
 
     //handle add trips
     const handleAddTrip = () => {
         if (!currentUser) {
-            alert("Please login to add a trip");
+            // alert("Please login to add a trip");
+            showToast("Please login to add a trip", "warning")
             router.push("/login"); // optional, remove if you only want alert
             return;
         }

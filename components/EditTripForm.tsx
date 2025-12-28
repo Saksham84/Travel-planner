@@ -1,41 +1,66 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trip } from "@/types/trip";
+import { useToast } from "@/components/ToastProvider";
 
 type Props = {
   trip: Trip;
-  onSave: (trip: Trip) => void;
+  onSave: (trip: Trip, imageFile?: File | null) => void;
   onCancel: () => void;
 };
 
 export default function EditTripForm({ trip, onSave, onCancel }: Props) {
+  const { showToast } = useToast();
+
   const [title, setTitle] = useState(trip.title);
   const [location, setLocation] = useState(trip.location);
   const [city, setCity] = useState(trip.city);
   const [date, setDate] = useState(trip.date);
   const [description, setDescription] = useState(trip.description);
-  const [image, setImage] = useState(trip.image || "");
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    trip.image?.url || null
+  );
+
   const [saving, setSaving] = useState(false);
 
+  /* ============================
+     IMAGE PREVIEW HANDLING
+     ============================ */
+  useEffect(() => {
+    if (!imageFile) return;
+
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  /* ============================
+     SUBMIT
+     ============================ */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !location || !city || !date || !description) {
-      alert("All fields except image are required");
+      showToast("All fields are required", "warning");
       return;
     }
 
     setSaving(true);
 
-    onSave({
-      ...trip,
-      title,
-      location,
-      city,
-      date,
-      description,
-      image: image || undefined,
-    });
+    onSave(
+      {
+        ...trip,
+        title,
+        location,
+        city,
+        date,
+        description,
+      },
+      imageFile
+    );
   };
 
   return (
@@ -87,20 +112,37 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         required
       />
 
-      <input
-        className="input"
-        placeholder="Image URL (optional)"
-        value={image}
-        onChange={(e) => setImage(e.target.value)}
-      />
+      {/* Image Upload */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Cover Image
+        </label>
 
-      {image && (
-        <img
-          src={image}
-          alt="Preview"
-          className="w-full h-40 object-cover rounded-md border"
+        <input
+          id="edit-image-upload"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
         />
-      )}
+
+        <label
+          htmlFor="edit-image-upload"
+          className="flex items-center justify-center h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 transition"
+        >
+          {!previewUrl ? (
+            <span className="text-gray-500 dark:text-gray-400 text-sm">
+              Click to upload image
+            </span>
+          ) : (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="w-full h-full object-cover rounded-lg"
+            />
+          )}
+        </label>
+      </div>
 
       <div className="flex justify-end gap-3 pt-2">
         <button

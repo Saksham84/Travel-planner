@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 
 export default function Signup() {
   const router = useRouter();
@@ -11,9 +12,12 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { showToast } = useToast();
+
   const handleSignup = async () => {
     if (!name || !email || !password) {
-      alert("All fields are required");
+    //   alert("All fields are required");
+    showToast("All fields are required", "warning")
       return;
     }
 
@@ -31,15 +35,18 @@ export default function Signup() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Signup failed");
+        // alert(data.error || "Signup failed");
+        showToast(data.error || "Signup failed", "error")
         setLoading(false);
         return;
       }
 
-      alert("Signup successful. Please login.");
+    //   alert("Signup successful. Please login.");
+    showToast("Signup successful. Please login.", "success")
       router.push("/login");
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+    //   alert("Something went wrong. Please try again.");
+    showToast("Something went wrong. Please try again.", "error")
     } finally {
       setLoading(false);
     }

@@ -27,3 +27,7 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out;
 }
+
+.nav-link {
+  @apply text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors;
+}

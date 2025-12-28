@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import Trip from "@/models/Trip";
+import cloudinary from "@/lib/cloudinary";
 
 /* ============================
    Helper: Get Auth User
@@ -33,38 +34,20 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    await connectDB();
+  await connectDB();
+  const { id } = await params;
 
-    const { id } = await params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: `Invalid trip id ${id}` },
-        { status: 400 }
-      );
-    }
-
-    const trip = await Trip.findById(id).populate(
-      "userId",
-      "name email"
-    );
-
-    if (!trip) {
-      return NextResponse.json(
-        { error: "Trip not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(trip);
-  } catch (error) {
-    console.error("Get Trip Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid trip id" }, { status: 400 });
   }
+
+  const trip = await Trip.findById(id).populate("userId", "name email");
+
+  if (!trip) {
+    return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(trip);
 }
 
 /* ============================
@@ -74,59 +57,64 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    await connectDB();
+  await connectDB();
+  const { id } = await params;
 
-    const { id } = await params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: "Invalid trip id" },
-        { status: 400 }
-      );
-    }
-
-    // 🔐 Auth check
-    const authUser = await getAuthUser();
-    if (!authUser) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const trip = await Trip.findById(id);
-    if (!trip) {
-      return NextResponse.json(
-        { error: "Trip not found" },
-        { status: 404 }
-      );
-    }
-
-    // 🔥 Owner check
-    if (trip.userId.toString() !== authUser.userId) {
-      return NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      );
-    }
-
-    const body = await req.json();
-
-    const updatedTrip = await Trip.findByIdAndUpdate(
-      id,
-      body,
-      { new: true, runValidators: true }
-    );
-
-    return NextResponse.json(updatedTrip);
-  } catch (error) {
-    console.error("Update Trip Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid trip id" }, { status: 400 });
   }
+
+  const authUser = await getAuthUser();
+  if (!authUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const trip = await Trip.findById(id);
+  if (!trip) {
+    return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  }
+
+  if (trip.userId.toString() !== authUser.userId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const formData = await req.formData();
+
+  trip.title = formData.get("title")?.toString();
+  trip.location = formData.get("location")?.toString();
+  trip.city = formData.get("city")?.toString();
+  trip.date = formData.get("date")?.toString();
+  trip.description = formData.get("description")?.toString();
+
+  const imageFile = formData.get("image") as File | null;
+
+  /* ===== CLOUDINARY IMAGE UPDATE ===== */
+  if (imageFile && imageFile.size > 0) {
+    // Delete old image
+    if (trip.image?.publicId) {
+      await cloudinary.uploader.destroy(trip.image.publicId);
+    }
+
+    const buffer = Buffer.from(await imageFile.arrayBuffer());
+
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: "trips" },
+        (err, result) => {
+          if (err) reject(err);
+          resolve(result);
+        }
+      ).end(buffer);
+    });
+
+    trip.image = {
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+    };
+  }
+
+  await trip.save();
+  return NextResponse.json(trip);
 }
 
 /* ============================
@@ -136,51 +124,32 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    await connectDB();
+  await connectDB();
+  const { id } = await params;
 
-    const { id } = await params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: "Invalid trip id" },
-        { status: 400 }
-      );
-    }
-
-    // 🔐 Auth check
-    const authUser = await getAuthUser();
-    if (!authUser) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const trip = await Trip.findById(id);
-    if (!trip) {
-      return NextResponse.json(
-        { error: "Trip not found" },
-        { status: 404 }
-      );
-    }
-
-    // 🔥 Owner check
-    if (trip.userId.toString() !== authUser.userId) {
-      return NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      );
-    }
-
-    await Trip.findByIdAndDelete(id);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Delete Trip Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid trip id" }, { status: 400 });
   }
+
+  const authUser = await getAuthUser();
+  if (!authUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const trip = await Trip.findById(id);
+  if (!trip) {
+    return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  }
+
+  if (trip.userId.toString() !== authUser.userId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // 🧹 Delete image from Cloudinary
+  if (trip.image?.publicId) {
+    await cloudinary.uploader.destroy(trip.image.publicId);
+  }
+
+  await Trip.findByIdAndDelete(id);
+  return NextResponse.json({ success: true });
 }

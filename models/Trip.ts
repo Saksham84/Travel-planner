@@ -7,10 +7,16 @@ const TripSchema = new mongoose.Schema(
     city: String,
     date: String,
     description: String,
-    image: String,
+
+    image: {
+      url: String,
+      publicId: String,
+    },
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
   },
   { timestamps: true }

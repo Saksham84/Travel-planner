@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Trip } from "@/types/trip";
+import { useToast } from "@/components/ToastProvider";
 
 const DEFAULT_IMAGE = "/default-trip.jpg";
 
@@ -12,13 +13,16 @@ export default function TripDetailPage() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { showToast } = useToast();
+
   useEffect(() => {
     const loadTrip = async () => {
       try {
         const res = await fetch(`/api/trips/${id}`);
 
         if (!res.ok) {
-          alert("Trip not found");
+        //   alert("Trip not found");
+        showToast("Trip not found", "error")
           router.push("/trips");
           return;
         }
@@ -26,7 +30,8 @@ export default function TripDetailPage() {
         const data = await res.json();
         setTrip(data);
       } catch {
-        alert("Failed to load trip");
+        // alert("Failed to load trip");
+        showToast("Failed to load trip", "error")
         router.push("/trips");
       } finally {
         setLoading(false);
@@ -53,7 +58,7 @@ export default function TripDetailPage() {
         {/* Cover Image */}
         <div className="rounded-xl overflow-hidden shadow-lg mb-8">
           <img
-            src={trip.image || DEFAULT_IMAGE}
+            src={trip.image?.url || DEFAULT_IMAGE}
             alt={trip.title}
             className="w-full h-[420px] object-cover"
           />
