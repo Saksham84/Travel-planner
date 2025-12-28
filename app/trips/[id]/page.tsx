@@ -2,32 +2,52 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Trip } from "@/types/trip";
+import { useToast } from "@/components/ToastProvider";
 
-const DEFAULT_IMAGE = "/default-trip.jpg"
-//   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee";
+const DEFAULT_IMAGE = "/default-trip.jpg";
 
 export default function TripDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const { showToast } = useToast();
 
   useEffect(() => {
-    const trips: Trip[] = JSON.parse(
-      localStorage.getItem("trips") || "[]"
-    );
+    const loadTrip = async () => {
+      try {
+        const res = await fetch(`/api/trips/${id}`);
 
-    const foundTrip = trips.find(
-      (t) => t.id === Number(id)
-    );
+        if (!res.ok) {
+        //   alert("Trip not found");
+        showToast("Trip not found", "error")
+          router.push("/trips");
+          return;
+        }
 
-    if (!foundTrip) {
-      alert("Trip not found");
-      router.push("/trips");
-      return;
-    }
+        const data = await res.json();
+        setTrip(data);
+      } catch {
+        // alert("Failed to load trip");
+        showToast("Failed to load trip", "error")
+        router.push("/trips");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setTrip(foundTrip);
+    loadTrip();
   }, [id, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading trip...
+      </div>
+    );
+  }
 
   if (!trip) return null;
 
@@ -38,7 +58,7 @@ export default function TripDetailPage() {
         {/* Cover Image */}
         <div className="rounded-xl overflow-hidden shadow-lg mb-8">
           <img
-            src={trip.image || DEFAULT_IMAGE}
+            src={trip.image?.url || DEFAULT_IMAGE}
             alt={trip.title}
             className="w-full h-[420px] object-cover"
           />
@@ -65,7 +85,7 @@ export default function TripDetailPage() {
           {/* Back button */}
           <button
             onClick={() => router.back()}
-            className="mt-8 inline-block px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
+            className="mt-8 inline-flex items-center px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
           >
             ← Back to Trips
           </button>
