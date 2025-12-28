@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export type Trip = {
   _id: string;         
   title: string;
@@ -6,7 +8,7 @@ export type Trip = {
   date: string;
   description: string;
   image?: string;      
-  userId: string;       
+  userId: string | User;       
   createdAt?: string;   
   updatedAt?: string;   
 };
