@@ -28,15 +28,15 @@ export function WhyChooseUs() {
             <div className="inline-block mb-4 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
               <span className="text-purple-600 dark:text-purple-400 text-sm">Why Choose Us</span>
             </div>
-            
+
             <h2 className="text-4xl md:text-6xl mb-6 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent leading-tight">
               Travel Planning Made Simple
             </h2>
-            
+
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-12 leading-relaxed">
-              We've built the most intuitive and beautiful travel planning experience. 
-              Whether you're planning a weekend getaway or a month-long adventure, 
-              we've got everything you need in one place.
+              We&apos;ve built the most intuitive and beautiful travel planning experience.
+              Whether you&apos;re planning a weekend getaway or a month-long adventure,
+              we&apos;ve got everything you need in one place.
             </p>
 
             <div className="space-y-6">
@@ -80,7 +80,7 @@ export function WhyChooseUs() {
           <div className="relative">
             {/* Decorative Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-teal-50 to-cyan-100 dark:from-blue-900/30 dark:via-teal-900/20 dark:to-cyan-900/30 rounded-3xl transform rotate-3"></div>
-            
+
             {/* Main Image Container */}
             <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
               <img
@@ -88,7 +88,7 @@ export function WhyChooseUs() {
                 alt="Switzerland Alps"
                 className="w-full h-auto rounded-2xl shadow-lg"
               />
-              
+
               {/* Floating Card */}
               <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-700 rounded-2xl shadow-2xl p-6 max-w-xs">
                 <div className="flex items-center gap-4 mb-3">

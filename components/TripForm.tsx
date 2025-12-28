@@ -1,60 +1,76 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Trip } from "@/types/trip";
 import { User } from "@/types/user";
-import { useRouter } from "next/navigation";
 
 export default function TripForm() {
+  const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const router = useRouter();
-
+  // 🔐 Check auth via cookie
   useEffect(() => {
-    const user = JSON.parse(
-      localStorage.getItem("currentUser") || "null"
-    );
+    const checkAuth = async () => {
+      const res = await fetch("/api/auth/me");
+      if (!res.ok) {
+        alert("Login required");
+        router.push("/login");
+        return;
+      }
 
-    if (!user) {
-      alert("Login required");
-      router.push("/login");
-    } else {
-      setCurrentUser(user);
-    }
-  }, [router]);
-
-  if (!currentUser) return null;
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const newTrip: Trip = {
-      id: Date.now(),
-      title,
-      location,
-      city,
-      date,
-      description,
-      image: image || undefined,
-      userId: currentUser.id,
+      const data = await res.json();
+      setCurrentUser(data.user);
+      setLoading(false);
     };
 
-    const existingTrips: Trip[] = JSON.parse(
-      localStorage.getItem("trips") || "[]"
-    );
+    checkAuth();
+  }, [router]);
 
-    localStorage.setItem(
-      "trips",
-      JSON.stringify([...existingTrips, newTrip])
-    );
+  if (loading) return null;
 
-    alert("Trip Added!");
-    router.push("/trips");
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          location,
+          city,
+          date,
+          description,
+          image: image || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Failed to publish trip");
+        setSubmitting(false);
+        return;
+      }
+
+      alert("Trip published successfully!");
+      router.push("/trips");
+    } catch {
+      alert("Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -71,7 +87,6 @@ export default function TripForm() {
       {/* Content */}
       <div className="relative w-full max-w-xl animate-fadeIn">
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
             Write Your Travel Story ✍️
           </h2>
@@ -138,9 +153,10 @@ export default function TripForm() {
 
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+              disabled={submitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-60"
             >
-              Publish Trip
+              {submitting ? "Publishing..." : "Publish Trip"}
             </button>
           </form>
         </div>

@@ -3,31 +3,46 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Trip } from "@/types/trip";
 
-const DEFAULT_IMAGE = "/default-trip.jpg"
-//   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee";
+const DEFAULT_IMAGE = "/default-trip.jpg";
 
 export default function TripDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const trips: Trip[] = JSON.parse(
-      localStorage.getItem("trips") || "[]"
-    );
+    const loadTrip = async () => {
+      try {
+        const res = await fetch(`/api/trips/${id}`);
 
-    const foundTrip = trips.find(
-      (t) => t.id === Number(id)
-    );
+        if (!res.ok) {
+          alert("Trip not found");
+          router.push("/trips");
+          return;
+        }
 
-    if (!foundTrip) {
-      alert("Trip not found");
-      router.push("/trips");
-      return;
-    }
+        const data = await res.json();
+        setTrip(data);
+      } catch {
+        alert("Failed to load trip");
+        router.push("/trips");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setTrip(foundTrip);
+    loadTrip();
   }, [id, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading trip...
+      </div>
+    );
+  }
 
   if (!trip) return null;
 
@@ -65,7 +80,7 @@ export default function TripDetailPage() {
           {/* Back button */}
           <button
             onClick={() => router.back()}
-            className="mt-8 inline-block px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
+            className="mt-8 inline-flex items-center px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
           >
             ← Back to Trips
           </button>

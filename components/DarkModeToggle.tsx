@@ -5,18 +5,30 @@ import { Moon, Sun } from "lucide-react";
 export default function DarkModeToggle() {
   const [dark, setDark] = useState(false);
 
+  // 🔹 Load theme from cookie or system
   useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
-    if (saved === "true") {
-      document.documentElement.classList.add("dark");
-      setDark(true);
-    }
+    const cookieTheme = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("theme="))
+      ?.split("=")[1];
+
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    const isDark = cookieTheme
+      ? cookieTheme === "dark"
+      : prefersDark;
+
+    document.documentElement.classList.toggle("dark", isDark);
+    setDark(isDark);
   }, []);
 
   const toggleDarkMode = () => {
-    document.documentElement.classList.toggle("dark");
-    localStorage.setItem("darkMode", String(!dark));
-    setDark(!dark);
+    const newTheme = !dark;
+    document.documentElement.classList.toggle("dark", newTheme);
+    document.cookie = `theme=${newTheme ? "dark" : "light"}; path=/; max-age=31536000`;
+    setDark(newTheme);
   };
 
   return (
@@ -25,8 +37,7 @@ export default function DarkModeToggle() {
       aria-label="Toggle Dark Mode"
       className="
         w-10 h-10 rounded-full
-        border border-gray-100
-        dark:border-white
+        border border-gray-200 dark:border-gray-700
         flex items-center justify-center
         bg-transparent
         hover:bg-gray-100 dark:hover:bg-gray-800

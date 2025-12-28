@@ -15,8 +15,18 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
   const [date, setDate] = useState(trip.date);
   const [description, setDescription] = useState(trip.description);
   const [image, setImage] = useState(trip.image || "");
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!title || !location || !city || !date || !description) {
+      alert("All fields except image are required");
+      return;
+    }
+
+    setSaving(true);
+
     onSave({
       ...trip,
       title,
@@ -24,13 +34,15 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
       city,
       date,
       description,
-      image: image || undefined, // optional
+      image: image || undefined,
     });
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-      
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-md mx-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4"
+    >
       <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
         Edit Trip
       </h2>
@@ -40,6 +52,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        required
       />
 
       <input
@@ -47,6 +60,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         placeholder="Location"
         value={location}
         onChange={(e) => setLocation(e.target.value)}
+        required
       />
 
       <input
@@ -54,6 +68,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         placeholder="City"
         value={city}
         onChange={(e) => setCity(e.target.value)}
+        required
       />
 
       <input
@@ -61,6 +76,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         className="input"
         value={date}
         onChange={(e) => setDate(e.target.value)}
+        required
       />
 
       <textarea
@@ -68,6 +84,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         placeholder="Trip description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        required
       />
 
       <input
@@ -87,6 +104,7 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
 
       <div className="flex justify-end gap-3 pt-2">
         <button
+          type="button"
           onClick={onCancel}
           className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
@@ -94,12 +112,13 @@ export default function EditTripForm({ trip, onSave, onCancel }: Props) {
         </button>
 
         <button
-          onClick={handleSave}
-          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
+          type="submit"
+          disabled={saving}
+          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-60"
         >
-          Save Changes
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
