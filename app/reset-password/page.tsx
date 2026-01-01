@@ -2,6 +2,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "@/components/ToastProvider";
+import { Suspense } from "react";
 
 export default function ResetPassword() {
   const params = useSearchParams();
@@ -44,6 +45,7 @@ export default function ResetPassword() {
   };
 
   return (
+    <Suspense fallback={<Loading />}>
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 px-4">
       <div className="relative w-full max-w-md">
         <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-10">
@@ -69,5 +71,15 @@ export default function ResetPassword() {
         </div>
       </div>
     </section>
+    </Suspense>
+  );
+}
+
+
+function Loading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
   );
 }
