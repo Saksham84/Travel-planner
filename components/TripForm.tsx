@@ -1,12 +1,14 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/types/user";
 import { useToast } from "@/components/ToastProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function TripForm() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { user, loading: authLoading } = useAuth();
 
   // Form fields
   const [title, setTitle] = useState("");
@@ -17,33 +19,20 @@ export default function TripForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // Auth & UI state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   /* ============================
-     AUTH CHECK
+     AUTH GUARD
      ============================ */
   useEffect(() => {
-    const checkAuth = async () => {
-      const res = await fetch("/api/auth/me");
-      if (!res.ok) {
-        showToast("Login required", "warning");
-        router.push("/login");
-        return;
-      }
-
-      const data = await res.json();
-      setCurrentUser(data.user);
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, [router, showToast]);
+    if (!authLoading && !user) {
+      showToast("Login required", "warning");
+      router.push("/login");
+    }
+  }, [authLoading, user, router, showToast]);
 
   /* ============================
-     IMAGE PREVIEW CLEANUP
+     IMAGE PREVIEW
      ============================ */
   useEffect(() => {
     if (!imageFile) {
@@ -57,10 +46,10 @@ export default function TripForm() {
     return () => URL.revokeObjectURL(url);
   }, [imageFile]);
 
-  if (loading) return null;
+  if (authLoading || !user) return null;
 
   /* ============================
-     SUBMIT FORM
+     SUBMIT
      ============================ */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -102,10 +91,12 @@ export default function TripForm() {
           "url(https://images.unsplash.com/photo-1500530855697-b586d89ba3ee)",
       }}
     >
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" />
 
+      {/* Card */}
       <div className="relative w-full max-w-xl">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Write Your Travel Story ✍️
           </h2>
@@ -114,14 +105,38 @@ export default function TripForm() {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <input className="input" placeholder="Trip title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <input
+              className="input"
+              placeholder="Trip title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
 
             <div className="grid grid-cols-2 gap-3">
-              <input className="input" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
-              <input className="input" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required />
+              <input
+                className="input"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+              />
+              <input
+                className="input"
+                placeholder="City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+              />
             </div>
 
-            <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <input
+              type="date"
+              className="input"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
 
             <textarea
               className="input resize-none h-28"
@@ -131,7 +146,7 @@ export default function TripForm() {
               required
             />
 
-            {/* Stylish Image Upload */}
+            {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Cover Image
@@ -142,12 +157,14 @@ export default function TripForm() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                onChange={(e) =>
+                  setImageFile(e.target.files?.[0] || null)
+                }
               />
 
               <label
                 htmlFor="image-upload"
-                className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 transition"
+                className="flex items-center justify-center h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 transition overflow-hidden"
               >
                 {!previewUrl ? (
                   <span className="text-gray-500 dark:text-gray-400 text-sm">
@@ -157,7 +174,7 @@ export default function TripForm() {
                   <img
                     src={previewUrl}
                     alt="Preview"
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover"
                   />
                 )}
               </label>
@@ -166,7 +183,7 @@ export default function TripForm() {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-60"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-60"
             >
               {submitting ? "Publishing..." : "Publish Trip"}
             </button>
